@@ -32,7 +32,24 @@ export default defineConfig({
         rollupOptions: {
             input: {
                 viewer: 'src/viewer.html'
+            },
+            output: {
+                manualChunks(id) {
+                    if (id.includes('node_modules')) {
+                        if (id.includes('element-plus')) {
+                            return 'element-plus';
+                        }
+                        if (id.includes('codemirror') || id.includes('vue-codemirror') || id.includes('@codemirror')) {
+                            return 'codemirror';
+                        }
+                        if (id.includes('vue')) {
+                            return 'vue'; // Separate Vue core
+                        }
+                        return 'vendor';
+                    }
+                }
             }
-        }
+        },
+        chunkSizeWarningLimit: 1000
     }
 })

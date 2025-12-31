@@ -7,6 +7,7 @@
       :snippets="snippets"
       @create="createNew"
       @open="openSnippet"
+      @run="runSnippetDirectly"
     />
 
     <!-- View: Editor -->
@@ -131,6 +132,10 @@ const runCode = (code) => {
     console.error(err)
     ElMessage.error('EXECUTION_ERROR')
   }
+}
+
+const runSnippetDirectly = (snippet) => {
+    runCode(snippet.content)
 }
 
 onMounted(loadSnippets)

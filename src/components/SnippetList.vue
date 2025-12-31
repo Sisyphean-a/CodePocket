@@ -33,11 +33,20 @@
           ID: {{ snippet.uuid.substring(0, 8) }}...
         </div>
         
-        <!-- Tags -->
-        <div class="flex gap-2 flex-wrap">
-           <span v-for="tag in snippet.tags" :key="tag" class="text-xs bg-black text-white px-2 py-0.5 font-bold">
-             #{{ tag }}
-           </span>
+        <!-- Tags & Actions -->
+        <div class="flex justify-between items-center mt-2">
+            <div class="flex gap-2 flex-wrap">
+               <span v-for="tag in snippet.tags" :key="tag" class="text-xs bg-black text-white px-2 py-0.5 font-bold">
+                 #{{ tag }}
+               </span>
+            </div>
+            
+            <button 
+                class="text-xs border-2 border-black px-2 py-0.5 font-bold hover:bg-black hover:text-white transition-none bg-white text-black z-10 relative"
+                @click.stop="$emit('run', snippet)"
+            >
+                [RUN]
+            </button>
         </div>
       </div>
 
@@ -69,5 +78,5 @@ const filteredSnippets = computed(() => {
   )
 })
 
-defineEmits(['create', 'open'])
+defineEmits(['create', 'open', 'run'])
 </script>
