@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full flex flex-col bg-white border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+  <div class="flex-1 flex flex-col min-h-0 bg-white border-2 border-black">
     <!-- Toolbar -->
     <div class="p-4 border-b-2 border-black flex justify-between items-center bg-gray-100">
       <div class="font-bold text-xl tracking-tighter bg-black text-white px-2">CodePocket_</div>

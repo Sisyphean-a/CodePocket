@@ -1,5 +1,5 @@
 <template>
-  <div class="h-screen flex flex-col bg-white overflow-hidden font-mono">
+  <div class="h-full flex flex-col bg-white overflow-hidden font-mono shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
     
     <!-- View: List -->
     <SnippetList 
