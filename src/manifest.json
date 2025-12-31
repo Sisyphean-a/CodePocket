@@ -11,7 +11,13 @@
         "default_path": "src/sidepanel/index.html"
     },
     "action": {
-        "default_title": "点击打开 Code Pocket"
+        "default_title": "点击打开 Code Pocket",
+        "default_icon": {
+            "48": "pixel_art.png"
+        }
+    },
+    "icons": {
+        "48": "pixel_art.png"
     },
     "background": {
         "service_worker": "src/background.js",
