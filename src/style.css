@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Fix for Fullscreen Dialog Layout */
+.editor-dialog.is-fullscreen {
+  display: flex !important;
+  flex-direction: column !important;
+  margin: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.editor-dialog.is-fullscreen .el-dialog__body {
+  flex: 1 !important;
+  min-height: 0 !important;
+  /* Crucial for nested scroll containers */
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0 !important;
+  /* Optional: remove padding for edge-to-edge editor */
+  overflow: hidden !important;
+}
+
+/* Ensure the direct child of body (our wrapper) fills the flexible space */
+.editor-dialog.is-fullscreen .el-dialog__body>div {
+  flex: 1;
+  height: 100%;
+}

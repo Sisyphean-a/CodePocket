@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Sandbox</title>
+</head>
+
+<body>
+    <script>
+        window.addEventListener('message', (event) => {
+            // In a real app, verify event.origin here matches chrome-extension://ID
+            const code = event.data;
+            if (typeof code === 'string') {
+                document.open();
+                document.write(code);
+                document.close();
+            }
+        });
+    </script>
+</body>
+
+</html>
