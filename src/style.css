@@ -1,33 +1,148 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Geek / Brutalist / Wireframe Theme */
+:root {
+  --el-color-primary: #000000;
+  --el-color-success: #16a34a;
+  --el-color-danger: #dc2626;
+  --el-border-radius-base: 0px;
+  --el-border-radius-small: 0px;
+  --el-border-radius-round: 0px;
+  --el-box-shadow-light: none;
+  --el-font-family: 'Courier New', Courier, monospace;
+}
 
 body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  @apply bg-gray-50 text-black font-mono overflow-auto;
+  /* Much clearer grid with less noise */
+  background-image: linear-gradient(#d1d5db 1px, transparent 1px),
+    linear-gradient(90deg, #d1d5db 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: -1px -1px;
 }
 
-/* Fix for Fullscreen Dialog Layout */
-.editor-dialog.is-fullscreen {
-  display: flex !important;
-  flex-direction: column !important;
-  margin: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
+/* Ensure #app takes full height and adds padding for floating effect */
+#app {
+  @apply p-4 h-full box-border;
 }
 
-.editor-dialog.is-fullscreen .el-dialog__body {
-  flex: 1 !important;
-  min-height: 0 !important;
-  /* Crucial for nested scroll containers */
-  display: flex !important;
-  flex-direction: column !important;
-  padding: 0 !important;
-  /* Optional: remove padding for edge-to-edge editor */
-  overflow: hidden !important;
+/* Force Monospace Everywhere */
+* {
+  font-family: 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", monospace !important;
 }
 
-/* Ensure the direct child of body (our wrapper) fills the flexible space */
-.editor-dialog.is-fullscreen .el-dialog__body>div {
-  flex: 1;
-  height: 100%;
+/* --- Element Plus Overrides (Using !important to guarantee minimal style) --- */
+
+/* Buttons */
+.el-button {
+  @apply rounded-none border-2 border-black text-black bg-white shadow-none transition-none !important;
+  text-transform: uppercase;
+  font-weight: 700 !important;
+}
+
+.el-button:hover {
+  @apply bg-black text-white border-black !important;
+}
+
+/* Primary Button (Inverted by default) */
+.el-button--primary {
+  @apply bg-black text-white border-black !important;
+}
+
+.el-button--primary:hover {
+  @apply bg-white text-black border-black !important;
+}
+
+/* Success/Action Buttons */
+.el-button--success {
+  @apply border-black text-black bg-white !important;
+}
+
+.el-button--success:hover {
+  @apply bg-green-600 text-white border-black !important;
+}
+
+/* Danger Buttons */
+.el-button--danger {
+  @apply border-red-600 text-red-600 !important;
+}
+
+/* Inputs */
+.el-input__wrapper {
+  @apply rounded-none shadow-none border-2 border-black bg-white !important;
+  padding-left: 8px !important;
+}
+
+.el-input__wrapper.is-focus {
+  @apply border-black ring-0 !important;
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1) !important;
+  /* Hard shadow on focus */
+}
+
+.el-input__inner {
+  @apply font-mono text-black !important;
+}
+
+/* Cards */
+.el-card {
+  @apply rounded-none border-2 border-black bg-white !important;
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 0) !important;
+  position: relative;
+  transition: all 0.1s ease-in-out;
+  margin-bottom: 1rem !important;
+}
+
+.el-card:hover {
+  box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1) !important;
+  transform: translate(-2px, -2px);
+  z-index: 10;
+}
+
+.el-card__header {
+  @apply border-b-2 border-black bg-gray-100 p-2 !important;
+}
+
+/* Dialogs */
+.el-dialog {
+  @apply rounded-none border-2 border-black !important;
+  box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1) !important;
+}
+
+.el-dialog__header {
+  @apply border-b-2 border-black mr-0 bg-white !important;
+}
+
+.el-dialog__body {
+  @apply p-0 !important;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-left: 1px solid #000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #000;
+  border: 1px solid #fff;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #333;
+}
+
+/* Custom Utility Classes */
+.geek-box {
+  @apply border-2 border-black bg-white p-2;
+}
+
+.geek-title {
+  @apply font-bold text-lg uppercase tracking-wider border-b-2 border-black pb-1 mb-2;
 }

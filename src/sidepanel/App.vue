@@ -1,64 +1,54 @@
 <template>
-  <div class="h-screen flex flex-col p-2 bg-gray-50">
-    <div class="mb-4">
-      <el-button type="primary" class="w-full" @click="createNew">
-        New Snippet
+  <div class="h-screen flex flex-col bg-white overflow-hidden font-mono">
+    
+    <!-- View: List -->
+    <SnippetList 
+      v-if="currentView === 'list'"
+      :snippets="snippets"
+      @create="createNew"
+      @open="openSnippet"
+    />
+
+    <!-- View: Editor -->
+    <SnippetEditor 
+      v-else-if="currentView === 'editor'"
+      :snippet="currentSnippet"
+      @update:snippet="updateCurrentSnippet"
+      @back="goBack"
+      @save="saveSnippet"
+      @run="runCode"
+      @delete="deleteSnippet"
+    />
+
+    <!-- View: Settings -->
+    <Settings 
+      v-else-if="currentView === 'settings'"
+      @back="goBack"
+    />
+
+    <!-- Global Footer / Navigation -->
+    <div v-if="currentView === 'list'" class="border-t-2 border-black p-2 bg-gray-50 flex justify-between items-center text-xs">
+      <div>Errors: 0</div>
+      <el-button size="small" @click="currentView = 'settings'">
+        [CONFIG]
       </el-button>
     </div>
-    
-    <div class="flex-1 overflow-auto">
-      <el-card v-for="snippet in snippets" :key="snippet.id" class="mb-2 cursor-pointer" @click="openSnippet(snippet)">
-        <div slot="header" class="flex justify-between items-center">
-          <span class="font-bold">{{ snippet.title || 'Untitled' }}</span>
-        </div>
-        <div class="text-xs text-gray-500 truncate">
-          {{ snippet.uuid }}
-        </div>
-      </el-card>
-    </div>
 
-    <!-- Editor Dialog -->
-    <el-dialog v-model="editorVisible" :title="currentSnippet.title" fullscreen class="editor-dialog">
-      <div class="flex flex-col h-full">
-        <div class="mb-2 flex gap-2">
-            <el-input v-model="currentSnippet.title" placeholder="Title" />
-            <el-button type="success" @click="runCode">Run</el-button>
-            <el-button type="primary" @click="saveSnippet">Save</el-button>
-        </div>
-        <codemirror
-            v-model="currentSnippet.content"
-            placeholder="Code goes here..."
-            :style="{ height: '100%', width: '100%', fontSize: '14px' }"
-            :autofocus="true"
-            :indent-with-tab="true"
-            :tab-size="2"
-            :extensions="extensions"
-        />
-      </div>
-    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, shallowRef } from 'vue'
+import { ref, onMounted } from 'vue'
 import { db } from '@/logic/storage'
 import { runSnippet as executeSnippet } from '@/logic/runner'
-import { Codemirror } from 'vue-codemirror'
-import { html } from '@codemirror/lang-html'
-import { oneDark } from '@codemirror/theme-one-dark'
-import { ElMessage } from 'element-plus'
+import SnippetList from '@/components/SnippetList.vue'
+import SnippetEditor from '@/components/SnippetEditor.vue'
+import Settings from '@/components/Settings.vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 const snippets = ref([])
-const editorVisible = ref(false)
-const currentSnippet = ref({ uuid: '', title: '', content: '' })
-
-// CodeMirror extensions
-const extensions = [html(), oneDark]
-
-// Editor view configuration
-const viewConfig = {
-    extensions: extensions
-}
+const currentView = ref('list') // list, editor, settings
+const currentSnippet = ref({})
 
 const loadSnippets = async () => {
   snippets.value = await db.snippets.toArray()
@@ -67,51 +57,86 @@ const loadSnippets = async () => {
 const createNew = () => {
   currentSnippet.value = {
     uuid: crypto.randomUUID(),
-    title: 'New Tool',
-    content: '<h1>Hello World</h1>',
+    title: 'New_Polymorph',
+    content: '<!-- Wired_Frame -->\n<h1>Hello World</h1>',
+    tags: [],
     createdAt: Date.now(),
     updatedAt: Date.now()
   }
-  editorVisible.value = true
+  currentView.value = 'editor'
 }
 
 const openSnippet = (snippet) => {
-  currentSnippet.value = { ...snippet }
-  editorVisible.value = true
+  currentSnippet.value = { ...snippet } // clone
+  currentView.value = 'editor'
 }
 
-const saveSnippet = async () => {
+const updateCurrentSnippet = (val) => {
+    currentSnippet.value = val
+}
+
+const goBack = () => {
+  currentView.value = 'list'
+  loadSnippets() // Refresh list on back
+}
+
+const saveSnippet = async (snippetData) => {
   try {
-    // Content is already up-to-date via v-model
-    const plainSnippet = JSON.parse(JSON.stringify(currentSnippet.value))
+    const plainSnippet = JSON.parse(JSON.stringify(snippetData))
+    plainSnippet.updatedAt = Date.now()
     
     if (plainSnippet.id) {
       await db.snippets.update(plainSnippet.id, plainSnippet)
     } else {
       delete plainSnippet.id 
       await db.snippets.add(plainSnippet)
+      // After add, reload to get ID if needed, but we usually go back or keep editing
     }
     await loadSnippets()
-    ElMessage.success('Saved successfully!')
+    ElMessage.success({
+        message: 'SEQUENCE_SAVED',
+        offset: 40,
+        plain: true,
+    })
   } catch (err) {
     console.error(err)
-    ElMessage.error('Failed to save: ' + err.message)
+    ElMessage.error('SAVE_FAILED')
   }
 }
 
-const runCode = () => {
+const deleteSnippet = async (snippetData) => {
+    try {
+        await ElMessageBox.confirm('DELETE_THIS_SEQUENCE?', 'WARNING', {
+            confirmButtonText: 'CONFIRM',
+            cancelButtonText: 'CANCEL',
+            type: 'warning',
+            roundButton: false
+        })
+        
+        if (snippetData.id) {
+            await db.snippets.delete(snippetData.id)
+            await loadSnippets()
+            currentView.value = 'list'
+            ElMessage.success('DELETED')
+        }
+    } catch (e) {
+        // Cancelled
+    }
+}
+
+const runCode = (code) => {
   try {
-    executeSnippet(currentSnippet.value.content)
+    executeSnippet(code)
   } catch (err) {
     console.error(err)
-    ElMessage.error('Failed to run: ' + err.message)
+    ElMessage.error('EXECUTION_ERROR')
   }
 }
 
 onMounted(loadSnippets)
 
-
 </script>
 
-<style scoped>
+<style>
+/* Global overrides if needed, but index.css handles most */
 </style>
