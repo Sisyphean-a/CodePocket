@@ -1,14 +1,15 @@
 <template>
   <div class="h-full flex flex-col p-4">
     <div class="font-bold text-xl mb-6 tracking-tighter border-b-2 border-black pb-2">
-      SETTINGS_
+      {{ $t('SETTINGS_TITLE') }}
     </div>
 
     <div class="space-y-6">
+      
       <!-- GitHub Token -->
       <div class="space-y-2">
-        <label class="block font-bold text-xs uppercase tracking-wider">GitHub Personal Access Token</label>
-        <div class="text-xs text-gray-500 mb-1">REQUIRED FOR GIST SYNC</div>
+        <label class="block font-bold text-xs uppercase tracking-wider">{{ $t('GH_TOKEN_LABEL') }}</label>
+        <div class="text-xs text-gray-500 mb-1">{{ $t('GH_TOKEN_HINT') }}</div>
         <input 
           v-model="settings.githubToken"
           type="password"
@@ -19,23 +20,42 @@
 
       <!-- Sync Actions -->
       <div class="border-2 border-black p-4 bg-gray-50">
-        <div class="font-bold mb-2">[CLOUD_SYNC]</div>
+        <div class="font-bold mb-2">{{ $t('CLOUD_SYNC') }}</div>
         <div class="grid grid-cols-2 gap-4">
             <el-button type="success" plain @click="handleBackup" :loading="backingUp">
-            UPLOAD (BACKUP)
+            {{ $t('BTN_UPLOAD') }}
             </el-button>
             <el-button type="warning" plain @click="handleRestore" :loading="restoring">
-            DOWNLOAD (RESTORE)
+            {{ $t('BTN_DOWNLOAD') }}
             </el-button>
         </div>
         <div class="text-xs text-gray-500 mt-2 font-mono truncate">
-            STATUS: {{ syncStatus || 'IDLE' }}
+            {{ $t('STATUS_LABEL') }} {{ syncStatus || $t('IDLE') }}
+        </div>
+      </div>
+
+      <!-- Language -->
+      <div class="border-2 border-black p-4 bg-gray-50">
+        <label class="block font-bold text-xs uppercase tracking-wider mb-2">{{ $t('LANGUAGE_LABEL') }}</label>
+        <div class="grid grid-cols-2 gap-4">
+            <el-button 
+                :type="currentLocale === 'en' ? 'primary' : ''" 
+                plain
+                @click="changeLocale('en')">
+                ENGLISH
+            </el-button>
+            <el-button 
+                :type="currentLocale === 'zh' ? 'primary' : ''" 
+                plain
+                @click="changeLocale('zh')">
+                中文
+            </el-button>
         </div>
       </div>
 
       <!-- About -->
       <div class="border-2 border-black p-4 bg-gray-50">
-        <div class="font-bold mb-2">[SYSTEM_INFO]</div>
+        <div class="font-bold mb-2">{{ $t('SYSTEM_INFO') }}</div>
         <div class="text-xs space-y-1 font-mono">
           <div>VERSION: 1.0.0</div>
           <div>BUILD: DIRECT_CONNECT</div>
@@ -46,13 +66,13 @@
       <!-- Actions -->
       <div class="pt-4">
         <el-button type="primary" class="w-full" @click="saveSettings">
-          SAVE_CONFIG
+          {{ $t('SAVE_CONFIG') }}
         </el-button>
       </div>
 
       <div class="text-center">
         <el-button @click="$emit('back')" class="w-full border-0 underline">
-          BACK_TO_MAIN
+          {{ $t('BACK_TO_MAIN') }}
         </el-button>
       </div>
     </div>
@@ -64,6 +84,7 @@ import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { db } from '@/logic/storage'
 import { GithubService } from '@/logic/github'
+import { currentLocale, setLocale, t, $t } from '@/logic/i18n'
 
 const settings = ref({
   githubToken: ''
@@ -72,6 +93,10 @@ const settings = ref({
 const backingUp = ref(false)
 const restoring = ref(false)
 const syncStatus = ref('')
+
+const changeLocale = (val) => {
+    setLocale(val)
+}
 
 onMounted(() => {
   const stored = localStorage.getItem('cp_settings')
@@ -84,17 +109,17 @@ onMounted(() => {
 
 const saveSettings = () => {
   localStorage.setItem('cp_settings', JSON.stringify(settings.value))
-  ElMessage.success('CONFIGURATION_SAVED')
+  ElMessage.success(t('CONFIG_SAVED'))
 }
 
 const handleBackup = async () => {
     if (!settings.value.githubToken) {
-        ElMessage.warning('TOKEN_REQUIRED')
+        ElMessage.warning(t('TOKEN_REQUIRED'))
         return
     }
     
     backingUp.value = true
-    syncStatus.value = 'CONNECTING_GITHUB...'
+    syncStatus.value = t('CONNECTING')
     
     try {
         const snippets = await db.snippets.toArray()
@@ -103,19 +128,19 @@ const handleBackup = async () => {
         const existingGist = await GithubService.getGist(settings.value.githubToken)
         
         if (existingGist) {
-            syncStatus.value = 'UPDATING_GIST...'
+            syncStatus.value = t('UPDATING')
             await GithubService.updateGist(settings.value.githubToken, existingGist.id, files)
         } else {
-            syncStatus.value = 'CREATING_GIST...'
+            syncStatus.value = t('CREATING')
             await GithubService.createGist(settings.value.githubToken, files)
         }
         
-        syncStatus.value = 'BACKUP_COMPLETE'
-        ElMessage.success('BACKUP_SUCCESSFUL')
+        syncStatus.value = t('BACKUP_DONE')
+        ElMessage.success(t('BACKUP_OK'))
     } catch (err) {
         console.error(err)
-        syncStatus.value = 'ERROR: ' + (err.message || 'UNKNOWN')
-        ElMessage.error('BACKUP_FAILED')
+        syncStatus.value = t('ERROR_PREFIX') + (err.message || 'UNKNOWN')
+        ElMessage.error(t('BACKUP_FAIL'))
     } finally {
         backingUp.value = false
     }
@@ -123,14 +148,14 @@ const handleBackup = async () => {
 
 const handleRestore = async () => {
     if (!settings.value.githubToken) {
-        ElMessage.warning('TOKEN_REQUIRED')
+        ElMessage.warning(t('TOKEN_REQUIRED'))
         return
     }
 
     try {
-        await ElMessageBox.confirm('THIS_WILL_OVERWRITE_LOCAL_DATA. CONTINUE?', 'WARNING', {
-            confirmButtonText: 'YES_OVERWRITE',
-            cancelButtonText: 'CANCEL',
+        await ElMessageBox.confirm(t('OVERWRITE_WARN'), t('CONFIRM_DELETE_TITLE'), {
+            confirmButtonText: t('YES_OVERWRITE'),
+            cancelButtonText: t('CANCEL_BTN'),
             type: 'warning'
         })
     } catch {
@@ -138,21 +163,21 @@ const handleRestore = async () => {
     }
 
     restoring.value = true
-    syncStatus.value = 'CONNECTING_GITHUB...'
+    syncStatus.value = t('CONNECTING')
 
     try {
         const existingGist = await GithubService.getGist(settings.value.githubToken)
         
         if (!existingGist) {
-            throw new Error('NO_BACKUP_FOUND')
+            throw new Error(t('NO_BACKUP'))
         }
 
-        syncStatus.value = 'DOWNLOADING_DATA...'
+        syncStatus.value = t('DOWNLOADING')
         const gistDetail = await GithubService.getGistDetail(settings.value.githubToken, existingGist.id)
         
         const indexFile = gistDetail.files['index.json']
         if (!indexFile) {
-            throw new Error('INVALID_BACKUP_FORMAT')
+            throw new Error(t('INVALID_FORMAT'))
         }
 
         const indexData = JSON.parse(indexFile.content)
@@ -168,26 +193,20 @@ const handleRestore = async () => {
             })
         }
 
-        syncStatus.value = 'WRITING_DB...'
-        
-        // Strategy: Clear and Replace to ensure consistency? 
-        // Or Merge? Let's use bulkPut (Upsert).
-        // But deleted items won't be deleted locally.
-        // Let's use Clear + Add for "Mirroring the Backup" if we want exact state.
-        // Design Decision: For "Restore", usually means recovering state. Let's Clear and Add.
+        syncStatus.value = t('WRITING_DB')
         
         await db.transaction('rw', db.snippets, async () => {
             await db.snippets.clear()
             await db.snippets.bulkAdd(newSnippets)
         })
 
-        syncStatus.value = 'RESTORE_COMPLETE'
-        ElMessage.success('RESTORE_SUCCESSFUL')
+        syncStatus.value = t('RESTORE_DONE')
+        ElMessage.success(t('RESTORE_OK'))
 
     } catch (err) {
         console.error(err)
-        syncStatus.value = 'ERROR: ' + (err.message || 'UNKNOWN')
-        ElMessage.error('RESTORE_FAILED')
+        syncStatus.value = t('ERROR_PREFIX') + (err.message || 'UNKNOWN')
+        ElMessage.error(t('RESTORE_FAIL'))
     } finally {
         restoring.value = false
     }

@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full flex flex-col bg-white overflow-hidden font-mono shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+  <div class="h-full flex flex-col bg-white overflow-hidden font-mono shadow-[4px_4px_1px_1px_rgba(0,0,0,1)]">
     
     <!-- View: List -->
     <SnippetList 
@@ -29,9 +29,9 @@
 
     <!-- Global Footer / Navigation -->
     <div v-if="currentView === 'list'" class="border-t-2 border-black p-2 bg-gray-50 flex justify-between items-center text-xs">
-      <div>Errors: 0</div>
+      <div>{{ $t('ERRORS') }}: 0</div>
       <el-button size="small" @click="currentView = 'settings'">
-        [CONFIG]
+        {{ $t('CONFIG') }}
       </el-button>
     </div>
 
@@ -46,6 +46,7 @@ import SnippetList from '@/components/SnippetList.vue'
 import SnippetEditor from '@/components/SnippetEditor.vue'
 import Settings from '@/components/Settings.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { t, $t } from '@/logic/i18n'
 
 const snippets = ref([])
 const currentView = ref('list') // list, editor, settings
@@ -58,8 +59,8 @@ const loadSnippets = async () => {
 const createNew = () => {
   currentSnippet.value = {
     uuid: crypto.randomUUID(),
-    title: 'New_Polymorph',
-    content: '<!-- Wired_Frame -->\n<h1>Hello World</h1>',
+    title: t('DEFAULT_TITLE'),
+    content: t('DEFAULT_CONTENT'),
     tags: [],
     createdAt: Date.now(),
     updatedAt: Date.now()
@@ -95,21 +96,21 @@ const saveSnippet = async (snippetData) => {
     }
     await loadSnippets()
     ElMessage.success({
-        message: 'SEQUENCE_SAVED',
+        message: t('SAVED_MSG'),
         offset: 40,
         plain: true,
     })
   } catch (err) {
     console.error(err)
-    ElMessage.error('SAVE_FAILED')
+    ElMessage.error(t('SAVE_FAILED'))
   }
 }
 
 const deleteSnippet = async (snippetData) => {
     try {
-        await ElMessageBox.confirm('DELETE_THIS_SEQUENCE?', 'WARNING', {
-            confirmButtonText: 'CONFIRM',
-            cancelButtonText: 'CANCEL',
+        await ElMessageBox.confirm(t('CONFIRM_DELETE_MSG'), t('CONFIRM_DELETE_TITLE'), {
+            confirmButtonText: t('CONFIRM_BTN'),
+            cancelButtonText: t('CANCEL_BTN'),
             type: 'warning',
             roundButton: false
         })
@@ -118,7 +119,7 @@ const deleteSnippet = async (snippetData) => {
             await db.snippets.delete(snippetData.id)
             await loadSnippets()
             currentView.value = 'list'
-            ElMessage.success('DELETED')
+            ElMessage.success(t('DELETED_MSG'))
         }
     } catch (e) {
         // Cancelled
@@ -130,7 +131,7 @@ const runCode = (code) => {
     executeSnippet(code)
   } catch (err) {
     console.error(err)
-    ElMessage.error('EXECUTION_ERROR')
+    ElMessage.error(t('EXEC_ERROR'))
   }
 }
 

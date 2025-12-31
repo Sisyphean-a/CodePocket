@@ -2,9 +2,9 @@
   <div class="flex-1 flex flex-col min-h-0 bg-white border-2 border-black">
     <!-- Toolbar -->
     <div class="p-4 border-b-2 border-black flex justify-between items-center bg-gray-100">
-      <div class="font-bold text-xl tracking-tighter bg-black text-white px-2">CodePocket_</div>
+      <div class="font-bold text-xl tracking-tighter bg-black text-white px-2">{{ $t('APP_TITLE') }}</div>
       <el-button type="primary" @click="$emit('create')">
-        + NEW
+        {{ $t('NEW') }}
       </el-button>
     </div>
 
@@ -12,7 +12,7 @@
     <div class="p-4 border-b-2 border-black bg-white">
       <el-input 
         v-model="searchQuery" 
-        placeholder="SEARCH_SNIPPETS..." 
+        :placeholder="$t('SEARCH_PLACEHOLDER')" 
         prefix-icon="Search"
       />
     </div>
@@ -26,7 +26,7 @@
         @click="$emit('open', snippet)"
       >
         <div class="flex justify-between items-start mb-2">
-          <span class="font-bold text-lg truncate border-b-2 border-transparent group-hover:border-black">{{ snippet.title || 'UNTITLED' }}</span>
+          <span class="font-bold text-lg truncate border-b-2 border-transparent group-hover:border-black">{{ snippet.title || $t('UNTITLED') }}</span>
           <span class="text-xs border-2 border-black px-1 font-bold">{{ snippet.content.length }}b</span>
         </div>
         <div class="text-xs text-gray-500 font-mono truncate mb-3">
@@ -45,13 +45,13 @@
                 class="text-xs border-2 border-black px-2 py-0.5 font-bold hover:bg-black hover:text-white transition-none bg-white text-black z-10 relative"
                 @click.stop="$emit('run', snippet)"
             >
-                [RUN]
+                {{ $t('RUN_BTN') }}
             </button>
         </div>
       </div>
 
       <div v-if="filteredSnippets.length === 0" class="text-center text-gray-400 py-10 border-2 border-dashed border-gray-300 m-4">
-        [NO_DATA_FOUND]
+        {{ $t('NO_DATA') }}
       </div>
     </div>
   </div>
@@ -59,6 +59,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { $t } from '@/logic/i18n'
 
 const props = defineProps({
   snippets: {

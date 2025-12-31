@@ -6,28 +6,28 @@
          <input 
             v-model="localSnippet.title" 
             class="w-full bg-transparent border-b border-black outline-none font-bold placeholder-gray-400"
-            placeholder="SNIPPET_TITLE"
+            :placeholder="$t('TITLE_PLACEHOLDER')"
          />
       </div>
       <div class="flex gap-2">
-         <el-button size="small" @click="$emit('back')">BACK</el-button>
-         <el-button type="success" size="small" @click="handleRun">RUN</el-button>
-         <el-button type="primary" size="small" @click="handleSave">SAVE</el-button>
+         <el-button size="small" @click="$emit('back')">{{ $t('BACK') }}</el-button>
+         <el-button type="success" size="small" @click="handleRun">{{ $t('RUN') }}</el-button>
+         <el-button type="primary" size="small" @click="handleSave">{{ $t('SAVE') }}</el-button>
       </div>
     </div>
 
     <!-- Metadata Bar -->
     <div class="flex items-center gap-2 p-2 border-b-2 border-black text-xs bg-white">
-        <span class="font-bold">TAGS:</span>
+        <span class="font-bold">{{ $t('TAGS_LABEL') }}</span>
         <input 
             v-model="tagsInput"
             @blur="updateTags"
             class="flex-1 outline-none border-b border-gray-300 focus:border-black font-mono"
-            placeholder="comma, separated, tags"
+            :placeholder="$t('TAGS_PLACEHOLDER')"
         />
-        <span class="font-bold border-l-2 border-black pl-2">UUID:</span> {{ localSnippet.uuid.substring(0,8) }}
+        <span class="font-bold border-l-2 border-black pl-2">{{ $t('UUID_LABEL') }}</span> {{ localSnippet.uuid.substring(0,8) }}
         <button class="text-red-600 hover:bg-red-50 px-2 border border-transparent hover:border-red-600 ml-2" @click="$emit('delete', localSnippet)">
-            [DELETE]
+            {{ $t('DELETE') }}
         </button>
     </div>
 
@@ -50,6 +50,7 @@
 import { ref, watch } from 'vue'
 import { Codemirror } from 'vue-codemirror'
 import { html } from '@codemirror/lang-html'
+import { $t } from '@/logic/i18n'
 
 const props = defineProps({
   snippet: {
