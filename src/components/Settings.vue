@@ -21,6 +21,17 @@
         />
       </div>
 
+      <!-- Editor Settings -->
+      <div class="border-2 border-black p-4 bg-gray-50">
+        <div class="font-bold mb-2">{{ $t("EDITOR_SETTINGS") }}</div>
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase">{{
+            $t("AUTO_RUN_LABEL")
+          }}</span>
+          <el-switch v-model="settings.autoRunAfterSave" />
+        </div>
+      </div>
+
       <!-- Sync Actions -->
       <div class="border-2 border-black p-4 bg-gray-50">
         <div class="font-bold mb-2">{{ $t("CLOUD_SYNC") }}</div>
@@ -105,6 +116,7 @@ import { currentLocale, setLocale, t, $t } from "@/logic/i18n";
 
 const settings = ref({
   githubToken: "",
+  autoRunAfterSave: false,
 });
 
 const backingUp = ref(false);

@@ -100,6 +100,19 @@ const saveSnippet = async (snippetData) => {
       offset: 40,
       plain: true,
     });
+
+    // Auto Run Check
+    try {
+      const storedSettings = localStorage.getItem("cp_settings");
+      if (storedSettings) {
+        const parsed = JSON.parse(storedSettings);
+        if (parsed.autoRunAfterSave) {
+          await runCode(plainSnippet.content);
+        }
+      }
+    } catch (e) {
+      console.error("Auto run failed", e);
+    }
   } catch (err) {
     console.error(err);
     ElMessage.error(t("SAVE_FAILED"));
@@ -130,17 +143,17 @@ const deleteSnippet = async (snippetData) => {
   }
 };
 
-const runCode = (code) => {
+const runCode = async (code) => {
   try {
-    executeSnippet(code);
+    await executeSnippet(code);
   } catch (err) {
     console.error(err);
     ElMessage.error(t("EXEC_ERROR"));
   }
 };
 
-const runSnippetDirectly = (snippet) => {
-  runCode(snippet.content);
+const runSnippetDirectly = async (snippet) => {
+  await runCode(snippet.content);
 };
 
 onMounted(loadSnippets);
